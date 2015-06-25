@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>DB8EB0CD-2389-4D09-BC57-ADCC04CB5EFA</string>
+	<key>IDESourceControlProjectName</key>
+	<string>CameraLaunch</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>0BCFDC888395A13B0FA90462BB6180F5D80646E9</key>
+		<string>10.7.1.10:bharadhwaj/floormeter-beta.git</string>
+		<key>75DDB33FD8943C351D2B9A5241FFF7B4116D498C</key>
+		<string>10.7.1.10:martin/floormeter-iosapplication.git</string>
+		<key>E380AC5D14CAE5D630D39129ED0FF2FBEF7142FF</key>
+		<string>10.7.1.10:bharadhwaj/floormeter.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>CameraLaunch.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>0BCFDC888395A13B0FA90462BB6180F5D80646E9</key>
+		<string>../../../floormeter-beta</string>
+		<key>75DDB33FD8943C351D2B9A5241FFF7B4116D498C</key>
+		<string>../..</string>
+		<key>E380AC5D14CAE5D630D39129ED0FF2FBEF7142FF</key>
+		<string>../../../floormeter</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>10.7.1.10:martin/floormeter-iosapplication.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>75DDB33FD8943C351D2B9A5241FFF7B4116D498C</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>E380AC5D14CAE5D630D39129ED0FF2FBEF7142FF</string>
+			<key>IDESourceControlWCCName</key>
+			<string>floormeter</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>0BCFDC888395A13B0FA90462BB6180F5D80646E9</string>
+			<key>IDESourceControlWCCName</key>
+			<string>floormeter-beta</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>75DDB33FD8943C351D2B9A5241FFF7B4116D498C</string>
+			<key>IDESourceControlWCCName</key>
+			<string>floormeter-iosapplication</string>
+		</dict>
+	</array>
+</dict>
+</plist>
