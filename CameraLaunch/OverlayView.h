@@ -46,6 +46,7 @@
     UIBezierPath *myPath;
     UIColor *strokeColor;
     UIView *canvasView;
+    UIView *canvasViewbg;
 
 
     

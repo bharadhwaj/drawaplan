@@ -12,6 +12,8 @@
 	<dict>
 		<key>0BCFDC888395A13B0FA90462BB6180F5D80646E9</key>
 		<string>10.7.1.10:bharadhwaj/floormeter-beta.git</string>
+		<key>3FB7800D988DDDE573C85636A3D740F7CF0DB4E3</key>
+		<string>bitbucket.org:bharadhwaj/floormeter-ios.git</string>
 		<key>75DDB33FD8943C351D2B9A5241FFF7B4116D498C</key>
 		<string>10.7.1.10:martin/floormeter-iosapplication.git</string>
 		<key>E380AC5D14CAE5D630D39129ED0FF2FBEF7142FF</key>
@@ -23,17 +25,19 @@
 	<dict>
 		<key>0BCFDC888395A13B0FA90462BB6180F5D80646E9</key>
 		<string>../../../floormeter-beta</string>
-		<key>75DDB33FD8943C351D2B9A5241FFF7B4116D498C</key>
+		<key>3FB7800D988DDDE573C85636A3D740F7CF0DB4E3</key>
 		<string>../..</string>
+		<key>75DDB33FD8943C351D2B9A5241FFF7B4116D498C</key>
+		<string>../../../floormeter-iosapplication</string>
 		<key>E380AC5D14CAE5D630D39129ED0FF2FBEF7142FF</key>
 		<string>../../../floormeter</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>10.7.1.10:martin/floormeter-iosapplication.git</string>
+	<string>bitbucket.org:bharadhwaj/floormeter-ios.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>75DDB33FD8943C351D2B9A5241FFF7B4116D498C</string>
+	<string>3FB7800D988DDDE573C85636A3D740F7CF0DB4E3</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
@@ -51,6 +55,14 @@
 			<string>0BCFDC888395A13B0FA90462BB6180F5D80646E9</string>
 			<key>IDESourceControlWCCName</key>
 			<string>floormeter-beta</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>3FB7800D988DDDE573C85636A3D740F7CF0DB4E3</string>
+			<key>IDESourceControlWCCName</key>
+			<string>floormeter-ios</string>
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>

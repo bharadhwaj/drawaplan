@@ -125,10 +125,10 @@
     angleList[count] = angleOne;
     float angle = angleList[0];
     
-    pointsList[count][0] = -3 * lengthOne * sinf((angleOne-angle)*M_PI/180) + 200;
+    pointsList[count][0] = -3 * lengthOne * sinf((angleOne-angle)*M_PI/180) + 250;
     pointsList[count][0] = sx * pointsList[count][0] + tx;
     
-    pointsList[count][1] = -3 * lengthOne * cosf((angleOne-angle)*M_PI/180) + 200;
+    pointsList[count][1] = -3 * lengthOne * cosf((angleOne-angle)*M_PI/180) + 250;
     pointsList[count][1] = sy * pointsList[count][1] + ty;
     
     
@@ -149,9 +149,11 @@
         NSLog(@"cheight %f",cheight);
 
         if(count == 1) {
-            
-            canvasView=[[UIView alloc]initWithFrame:CGRectMake(cwidth/2, cheight/2, cwidth/2, cheight/2)];
-            [canvasView setBackgroundColor:[UIColor blackColor]];
+            canvasViewbg=[[UIView alloc]initWithFrame:CGRectMake(cwidth/2+10, cheight/2+40, cwidth/2-20, cheight/2-90)];
+            [canvasViewbg setBackgroundColor: [UIColor colorWithRed:0.059 green:0.059 blue:0.059 alpha:1]];
+            [self addSubview:canvasViewbg];
+            canvasView=[[UIView alloc]initWithFrame:CGRectMake(cwidth/2+15, cheight/2+45, cwidth/2-30, cheight/2-100)];
+            [canvasView setBackgroundColor: [UIColor colorWithRed:0.227 green:0.227 blue:0.227 alpha:1]];
             [self addSubview:canvasView];
         }
         
@@ -232,7 +234,7 @@
     
     [self addSubview:heightButton];
     [self addSubview:scaleButton];
-    
+    [canvasViewbg removeFromSuperview];
     [canvasView removeFromSuperview];
     
     
