@@ -21,6 +21,8 @@
 		3F73A4E11B3C89F00015CA59 /* heighthighlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F73A4DB1B3C89F00015CA59 /* heighthighlight.png */; };
 		3F73A4E21B3C89F00015CA59 /* scale.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F73A4DC1B3C89F00015CA59 /* scale.png */; };
 		3F73A4E31B3C89F00015CA59 /* scalehighlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F73A4DD1B3C89F00015CA59 /* scalehighlight.png */; };
+		3F73A4E61B3C90170015CA59 /* close.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F73A4E41B3C90170015CA59 /* close.png */; };
+		3F73A4E71B3C90170015CA59 /* closehighlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F73A4E51B3C90170015CA59 /* closehighlight.png */; };
 		5AFEA8A51B3936A90088B021 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AFEA8A41B3936A90088B021 /* QuartzCore.framework */; };
 		5AFEA8A81B3941110088B021 /* canvas.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AFEA8A71B3941110088B021 /* canvas.m */; };
 		706B34DC1AEFAA760072FBB9 /* OverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 706B34DB1AEFAA760072FBB9 /* OverlayView.m */; };
@@ -57,6 +59,8 @@
 		3F73A4DB1B3C89F00015CA59 /* heighthighlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = heighthighlight.png; sourceTree = "<group>"; };
 		3F73A4DC1B3C89F00015CA59 /* scale.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scale.png; sourceTree = "<group>"; };
 		3F73A4DD1B3C89F00015CA59 /* scalehighlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scalehighlight.png; sourceTree = "<group>"; };
+		3F73A4E41B3C90170015CA59 /* close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = close.png; sourceTree = "<group>"; };
+		3F73A4E51B3C90170015CA59 /* closehighlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = closehighlight.png; sourceTree = "<group>"; };
 		5AFEA8A41B3936A90088B021 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		5AFEA8A61B3941110088B021 /* canvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = canvas.h; sourceTree = "<group>"; };
 		5AFEA8A71B3941110088B021 /* canvas.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = canvas.m; sourceTree = "<group>"; };
@@ -153,6 +157,8 @@
 		7055E9451AF097490088FB20 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				3F73A4E41B3C90170015CA59 /* close.png */,
+				3F73A4E51B3C90170015CA59 /* closehighlight.png */,
 				3F73A4D81B3C89F00015CA59 /* end.png */,
 				3F73A4D91B3C89F00015CA59 /* endhighlight.png */,
 				3F73A4DA1B3C89F00015CA59 /* height.png */,
@@ -251,6 +257,8 @@
 				3F2A476F1AEA3B010088B67A /* Images.xcassets in Resources */,
 				3F73A4E31B3C89F00015CA59 /* scalehighlight.png in Resources */,
 				3F73A4E01B3C89F00015CA59 /* height.png in Resources */,
+				3F73A4E61B3C90170015CA59 /* close.png in Resources */,
+				3F73A4E71B3C90170015CA59 /* closehighlight.png in Resources */,
 				3F73A4E11B3C89F00015CA59 /* heighthighlight.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

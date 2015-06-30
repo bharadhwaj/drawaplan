@@ -13,27 +13,70 @@
 #import "canvas.h"
 
 
-#define degrees(x) (180 * x / M_PI)
 
+
+#define degrees(x) (180 * x / M_PI)
+#define pixel 37.795276
 
 @implementation OverlayView
 
     canvas *canv[50];
+    canvas *canvbig[50];
     int count;
+
+
+typedef int OutCode;
+
+const int INSIDE = 0; // 0000
+const int LEFT = 1;   // 0001
+const int RIGHT = 2;  // 0010
+const int BOTTOM = 4; // 0100
+const int TOP = 8;    // 1000
+
+-(int) ComputeOutCode:(double)x andnum2:(double)y andNum3:(double)xmin andNum4:(double)ymin andNum5:(double)xmax andNum6:(double)ymax;
+{
+    OutCode code;
     
-- (id)initWithFrame:(CGRect)frame {
+    code = INSIDE;          // initialised as being inside of clip window
+    
+    if (x < xmin)           // to the left of clip window
+        code |= LEFT;
+    else if (x > xmax)      // to the right of clip window
+        code |= RIGHT;
+    if (y < ymin)           // below the clip window
+        code |= BOTTOM;
+    else if (y > ymax)      // above the clip window
+        code |= TOP;
+    
+    return code;
+}
+
+
+
+    - (id)initWithFrame:(CGRect)frame {
     
     if ((self = [super initWithFrame:frame])) {
-         count = -1;
-        NSLog(@"count= %d",count);
+        
+        count = -1;
        
         // <--- Reading height from NSUserDefaults --->
         height = [[NSUserDefaults standardUserDefaults] stringForKey:@"Height"];
         heightInFloat = [height floatValue];
-        if(height != nil) {
+        
+        
+        // <--- Reading scale from NSUserDefaults --->
+        scale = [[NSUserDefaults standardUserDefaults] stringForKey:@"Scale"];
+        scaleInFloat = [scale floatValue];
+        
+        
+        if(height != nil & scale != nil) {
             [self yesButtonTouchUpInside];
         }
+        
+        
+        
         NSLog(@"Height read: %@",height);
+        NSLog(@"Scale read: %@",scale);
         
         
         //<--- Clear the background of the overlay --->
@@ -44,7 +87,6 @@
         //<--- For the cross hair on camera view --->
         CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
         CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
-        
                
         lineView = [[UIView alloc] initWithFrame:CGRectMake(0, cheight/2.0, cwidth, 1)];
         lineView.backgroundColor = [UIColor colorWithRed:0.345 green:0.345 blue:0.345 alpha:1];
@@ -54,15 +96,18 @@
         lineView.backgroundColor = [UIColor colorWithRed:0.345 green:0.345 blue:0.345 alpha:1];
         [self addSubview:lineView];
         
+        
         //<--- For Navigation bar at the top --->
         UINavigationBar *navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, cwidth, 40)];
         navBar.barTintColor = [UIColor colorWithRed:0.627 green:0.627 blue:0.627 alpha:1];
         [self addSubview:navBar];
         
+        
         //<--- For Toolbar at the bottom --->
         UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, cheight-40, cwidth, 40)];
         toolBar.barTintColor = [UIColor colorWithRed:0.627 green:0.627 blue:0.627 alpha:1];
         [self addSubview:toolBar];
+        
         
         //<--- For Height button --->
         heightButton = [[UIButton alloc] initWithFrame:CGRectMake(5, 5, 70, 30)];
@@ -72,6 +117,7 @@
         [heightButton setImage:heightHighlightImage forState:UIControlStateHighlighted];
         [heightButton addTarget:self action:@selector(heightButtonTouchUpInside) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:heightButton];
+        
         
         //<--- For Scale button --->
         scaleButton = [[UIButton alloc] initWithFrame:CGRectMake(cwidth-75, 5, 70, 30)];
@@ -89,17 +135,26 @@
 // <--- Action when Snap button on screen is pressed --->
 - (void)snapButtonTouchUpInside {
     
-    
     count++;
     loop = count;
+    
+    // <--- Reading height from NSUserDefaults --->
+    height = [[NSUserDefaults standardUserDefaults] stringForKey:@"Height"];
+    heightInFloat = [height floatValue];
+    
+    // <--- Reading scale from NSUserDefaults --->
+    scale = [[NSUserDefaults standardUserDefaults] stringForKey:@"Scale"];
+    scaleInFloat = [scale floatValue];
     
     
     CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
     CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
     
     CGFloat xWmin, xWmax, yWmin, yWmax, xVmin, xVmax, yVmin, yVmax;
+    CGFloat xVminBig, xVmaxBig, yVminBig, yVmaxBig;
     
     CGFloat sx, sy, tx, ty;
+    CGFloat txBig, tyBig, sxbig, sybig;
     
     // <--- Translation and Scaling to map the point --->
     xWmin = 0;
@@ -112,43 +167,66 @@
     yVmin = cheight/2;
     yVmax = cheight;
     
-    sx = 0.5;
-    sy = 0.5;
+    xVminBig = 15;
+    xVmaxBig = cwidth-10;
+    yVminBig = 55;
+    yVmaxBig = cheight-50;
+
+    
+    sx=(xVmax-xVmin)/(xWmax-xWmin);
+    sy=(yVmax-yVmin)/(yWmax-yWmin);
+    
+    sxbig=(xVmaxBig-xVminBig)/(xWmax-xWmin);
+    sybig=(yVmaxBig-yVminBig)/(yWmax-yWmin);
     
     tx = (xWmax*xVmin - xWmin*xVmax)/(xWmax - xWmin);
     ty = (yWmax*yVmin - yWmin*yVmax)/(yWmax - yWmin);
     
+    txBig = (xWmax*xVminBig - xWmin*xVmaxBig)/(xWmax - xWmin);
+    tyBig = (yWmax*yVminBig - yWmin*yVmaxBig)/(yWmax - yWmin);
+    
+    
     
     angleOne = rollAngle*180/M_PI;
+    
     lengthOne = [self read];
+    
     lengthList[count] = lengthOne;
     angleList[count] = angleOne;
+    
     float angle = angleList[0];
-    
-    pointsList[count][0] = -3 * lengthOne * sinf((angleOne-angle)*M_PI/180) + 250;
-    pointsList[count][0] = sx * pointsList[count][0] + tx;
-    
-    pointsList[count][1] = -3 * lengthOne * cosf((angleOne-angle)*M_PI/180) + 250;
-    pointsList[count][1] = sy * pointsList[count][1] + ty;
+
     
     
-    for(int i = 0; i <= count; i++) {
-        NSLog(@"Length %d = %f",i,lengthList[i] );
-        NSLog(@"Angle %d = %f",i,angleList[i] );
+    pointsList[count][0] =  -1 * sqrtf(2.0) * lengthOne * (pixel/scaleInFloat) * sinf((angleOne-angle)*M_PI/180)+(cwidth/2);
+    if (pointsList[count][0] < 0) {
+        pointsList[count][0] = -1 * pointsList[count][0];
     }
     
+    pointsListBig[count][0] =  pointsList[count][0];
+    pointsList[count][0] =  sx * pointsList[count][0] + cwidth/2 + 15;
     
+    pointsList[count][1] = -1 * sqrtf(2.0) * lengthOne * (pixel/scaleInFloat) * cosf((angleOne-angle)*M_PI/180)+(cheight/2);
+    if (pointsList[count][1] < 0) {
+        pointsList[count][1] = -1 * pointsList[count][1];
+    }
+        pointsListBig[count][1] =   pointsList[count][1];
+    pointsList[count][1] =  sy * pointsList[count][1] + cheight/2 + 45;
+    NSLog(@"Sx: %f \n Sy: %f \n SxBig: %f \n SyBig: %f",sx,sy,sxbig,sybig);
+    NSLog(@"Tx: %f \n Ty: %f \n TxBig: %f \n TyBig: %f",tx,ty,txBig,tyBig);
+    NSLog(@"Point %d X: %f",count,pointsListBig[count][0]);
+    NSLog(@"Point %d Y: %f",count,pointsListBig[count][1]);
     
     if(count >= 1) {
-        
+        int j;
         int p = count - 1;
         int q = count;
-        NSLog(@"count= %d",count);
+        numberOfPoints = count+1;
         
-        NSLog(@"cwidth %f",cwidth);
-        NSLog(@"cheight %f",cheight);
+
 
         if(count == 1) {
+            // <--- Small canvas border -->
             canvasViewbg=[[UIView alloc]initWithFrame:CGRectMake(cwidth/2+10, cheight/2+40, cwidth/2-20, cheight/2-90)];
             [canvasViewbg setBackgroundColor: [UIColor colorWithRed:0.059 green:0.059 blue:0.059 alpha:1]];
             [self addSubview:canvasViewbg];
@@ -157,18 +235,120 @@
             [self addSubview:canvasView];
         }
         
-        // <--- Checking whether the point to draw is out of bound. --->
-        if(pointsList[p][0] < cwidth/2 || pointsList[p][0] > cwidth || pointsList[p][1] > cheight || pointsList[p][1] < cheight/2 || pointsList[q][0] < cwidth/2 || pointsList[q][0] > cwidth || pointsList[q][1] > cheight || pointsList[q][1] < cheight/2) {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Cannot draw. Point out of drawing area." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-            [alert show];
-    
+        for(int i = 0; i < numberOfPoints; i++) {
+            
+            if(i == numberOfPoints - 1)
+                j = 0;
+            else
+                j = i+1;
+            
+            // <--- To find the total angle swept across --->
+            if(angleList[i] > angleList[j])
+                angleSweptList[i] = angleList[i]-angleList[j];
+            else
+                angleSweptList[i] = angleList[j]-angleList[i];
+            
+            // <-- Formula for finding the distance --->
+            // C^2 = A^2 + B^2 - 2.A.B.cos(c)
+            distanceList[i] = sqrtf((lengthList[i]*lengthList[i])+(lengthList[j]*lengthList[j])-(2.0*lengthList[i]*lengthList[j]*cosf(angleSweptList[i]*M_PI/180)));
+            
+            //NSLog(@"AngleTotal %d = %f",i,angleSweptList[i]);
+            //NSLog(@"DistanceTotal %d = %f",i,distanceList[i]);
+            
         }
-        else {
-            canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsList[p][0] withStartY: pointsList[p][1] withEndX: pointsList[q][0] withEndY: pointsList[q][1]];
+
+        
+        //cohen sutherlan algorithm
+        
+        int xmin=cwidth/2+15;
+        int ymin=cheight/2+45;
+        int xmax=cwidth-15;
+        int ymax=cheight-55;
+        
+        int x0=pointsList[p][0];
+        int y0=pointsList[p][1];
+        int x1=pointsList[q][0];
+        int y1=pointsList[q][1];
+        [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+        
+        OutCode outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+        OutCode outcode1 = [self ComputeOutCode:x1 andnum2:y1 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+        
+        bool accept = false;
+        
+        while (true) {
+            if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
+                accept = true;
+                break;
+            } else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
+                break;
+            } else {
+                // failed both tests, so calculate the line segment to clip
+                // from an outside point to an intersection with clip edge
+                double x=0, y=0;
+                
+                // At least one endpoint is outside the clip rectangle; pick it.
+                OutCode outcodeOut = outcode0 ? outcode0 : outcode1;
+                
+                // Now find the intersection point;
+                // use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
+                if (outcodeOut & TOP) {           // point is above the clip rectangle
+                    x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
+                    y = ymax;
+                } else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
+                    x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
+                    y = ymin;
+                } else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
+                    y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
+                    x = xmax;
+                } else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
+                    y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
+                    x = xmin;
+                }
+                
+                // Now we move outside point to intersection point to clip
+                // and get ready for next pass.
+                if (outcodeOut == outcode0) {
+                    x0 = x;
+                    y0 = y;
+                    outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+                    
+                } else {
+                    x1 = x;
+                    y1 = y;
+                    outcode1 = [self ComputeOutCode:x1 andnum2:y1 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+                }
+            }
+        }
+        if (accept) {
+            // Following functions are left for implementation by user based on
+            // their platform (OpenGL/graphics.h etc.)
+            
+            // LineSegment(x0, y0, x1, y1);
+            CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
+            CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
+            NSLog(@"dist%f ",distanceList[count-1]);
+            canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: x0 withStartY: y0 withEndX: x1 withEndY: y1 withdist:distanceList[count-1]];
             [self addSubview:canv[count-1]];
             [canv[count-1] setNeedsDisplay];
-        
+            
         }
+
+        
+        //<--- Checking whether the point to draw is out of bound. --->
+        /*if(pointsList[p][0] < cwidth/2+15 || pointsList[p][0] > cwidth - 15 || pointsList[p][1] > cheight - 55 || pointsList[p][1] < cheight/2 + 55 || pointsList[q][0] < cwidth/2 + 15 || pointsList[q][0] > cwidth - 15 || pointsList[q][1] > cheight - 55 || pointsList[q][1] < cheight/2 + 55) {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Cannot draw. Point out of drawing area." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [alert show];
+            count--;
+    
+        }
+        else {*/
+         
+            /* canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsList[p][0] withStartY: pointsList[p][1] withEndX: pointsList[q][0] withEndY: pointsList[q][1] withdist:distanceList[count-1]];
+            [self addSubview:canv[count-1]];
+            [canv[count-1] setNeedsDisplay];
+        //}
+        */
         
     }
         
@@ -206,51 +386,168 @@
 
 - (void)endButtonTouchUpInside {
     
-    numberOfPoints = count+1;
-    NSLog(@"Points : %d",numberOfPoints);
-    int j;
     
-    for(int i = 0; i < numberOfPoints; i++) {
-        if(i == numberOfPoints - 1)
-            j = 0;
-        else
-            j = i+1;
-        
-        // <--- To find the total angle swept across --->
-        if(angleList[i] > angleList[j])
-            angleSweptList[i] = angleList[i]-angleList[j];
-        else
-            angleSweptList[i] = angleList[j]-angleList[i];
-        
-        // <-- Formula for finding the distance --->
-        // C^2 = A^2 + B^2 - 2.A.B.cos(c)
-        distanceList[i] = sqrtf((lengthList[i]*lengthList[i])+(lengthList[j]*lengthList[j])-(2.0*lengthList[i]*lengthList[j]*cosf(angleSweptList[i]*M_PI/180)));
-        
-        NSLog(@"AngleTotal %d = %f",i,angleSweptList[i]);
-        NSLog(@"DistanceTotal %d = %f",i,distanceList[i]);
-
-    }
+    CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
+    CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
+    
+    // <--- For blurring the BG --->
+    UIVisualEffect *blurEffect;
+    blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    visualEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    visualEffectView.frame = [[UIScreen mainScreen] bounds];
+    [self addSubview:visualEffectView];
+    
+    //<--- For Navigation bar at the top --->
+    UINavigationBar *navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, cwidth, 40)];
+    navBar.barTintColor = [UIColor colorWithRed:0.627 green:0.627 blue:0.627 alpha:1];
+    [self addSubview:navBar];
+    
+    //<--- For Toolbar at the bottom --->
+    UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, cheight-40, cwidth, 40)];
+    toolBar.barTintColor = [UIColor colorWithRed:0.627 green:0.627 blue:0.627 alpha:1];
+    [self addSubview:toolBar];
+    
+    //<--- For loading Big canvas Screen --->
+    canvasViewbgBig=[[UIView alloc]initWithFrame:CGRectMake(10, 50, cwidth-20, cheight-100)];
+    [canvasViewbgBig setBackgroundColor: [UIColor colorWithRed:0.059 green:0.059 blue:0.059 alpha:1]];
+    [self addSubview:canvasViewbgBig];
+    canvasViewBig=[[UIView alloc]initWithFrame:CGRectMake(15, 55, cwidth-30, cheight-110)];
+    [canvasViewBig setBackgroundColor: [UIColor colorWithRed:0.227 green:0.227 blue:0.227 alpha:1]];
+    [self addSubview:canvasViewBig];
     
     
-    [self addSubview:heightButton];
-    [self addSubview:scaleButton];
     [canvasViewbg removeFromSuperview];
     [canvasView removeFromSuperview];
+    loop = count;
     
-    
-    for(int i = 0; i < count; i++) {
-        [canv[i] removeFromSuperview];
-        [endButton removeFromSuperview];
+    for(int j = 1; j <= loop; j++) {
+        int p = j - 1;
+        int q = j;
+        
+        // <--- Removing old small canvas --->
+        [canv[p] removeFromSuperview];
+        
+        
+        // <--- Cohen-Sutherland algorithm --->
+        
+        int xmin = 15;
+        int ymin = 55;
+        int xmax = cwidth - 15;
+        int ymax = cheight - 55;
+        
+        int x0 = pointsListBig[p][0];
+        int y0 = pointsListBig[p][1];
+        int x1 = pointsListBig[q][0];
+        int y1 = pointsListBig[q][1];
+        [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+        
+        OutCode outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+        OutCode outcode1 = [self ComputeOutCode:x1 andnum2:y1 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+        
+        bool accept = false;
+        
+        while (true) {
+            if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
+                accept = true;
+                break;
+            } else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
+                break;
+            } else {
+                // Failed both tests, so calculate the line segment to clip
+                // From an outside point to an intersection with clip edge
+                double x=0, y=0;
+                
+                // At least one endpoint is outside the clip rectangle; pick it.
+                OutCode outcodeOut = outcode0 ? outcode0 : outcode1;
+                
+                // Now find the intersection point;
+                // Use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
+                if (outcodeOut & TOP) {           // point is above the clip rectangle
+                    x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
+                    y = ymax;
+                } else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
+                    x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
+                    y = ymin;
+                } else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
+                    y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
+                    x = xmax;
+                } else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
+                    y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
+                    x = xmin;
+                }
+                
+                // Now we move outside point to intersection point to clip
+                // and get ready for next pass.
+                if (outcodeOut == outcode0) {
+                    x0 = x;
+                    y0 = y;
+                    outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+                    
+                } else {
+                    x1 = x;
+                    y1 = y;
+                    outcode1 = [self ComputeOutCode:x1 andnum2:y1 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
+                }
+            }
+        }
+        if (accept) {
+            // Following functions are left for implementation by user based on
+            // their platform (OpenGL/graphics.h etc.)
             
+            // LineSegment(x0, y0, x1, y1);
+            CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
+            CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
+            NSLog(@"dist%f ",distanceList[count-1]);
+            canvbig[p] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: x0 withStartY: y0 withEndX: x1 withEndY: y1 withdist:distanceList[p]];
+            [self addSubview:canvbig[p]];
+            [canvbig[p] setNeedsDisplay];
+            
+        }
+
+        
+        
+        
+        
+        
+        
+        
+        // <--- Adding new big canvas --->
+       /* canvbig[p] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsListBig[p][0] withStartY: pointsListBig[p][1] withEndX: pointsListBig[q][0] withEndY: pointsListBig[q][1] withdist: distanceList[p]];
+        [self addSubview:canvbig[p]];
+        [canvbig[p] setNeedsDisplay];*/
     }
+    
+    //<--- For close button after clicking end--->
+    [endButton removeFromSuperview];
+    [heightButton removeFromSuperview];
+    [scaleButton removeFromSuperview];
+    closeButton = [[UIButton alloc] initWithFrame:CGRectMake(cwidth/2.0-35, 5, 70, 30)];
+    UIImage *closeImage = [UIImage imageNamed:@"close.png"];
+    UIImage *closeHighlightImage = [UIImage imageNamed:@"closehighlight.png"];
+    [closeButton setImage:closeImage forState:UIControlStateNormal];
+    [closeButton setImage:closeHighlightImage forState:UIControlStateHighlighted];
+    [closeButton addTarget:self action:@selector(closeButtonTouchUpInside) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:closeButton];
+    
     count = -1;
 
 }
 
-- (void)scaleButtonTouchUpInside {
+- (void)closeButtonTouchUpInside {
     
+    [self addSubview:heightButton];
+    [self addSubview:scaleButton];
+    [canvasViewbgBig removeFromSuperview];
+    [canvasViewBig removeFromSuperview];
+    [visualEffectView removeFromSuperview];
+    [closeButton removeFromSuperview];
     
+    // <--- For removing large canvas --->
+    for(int i = 0; i < loop; i++) {
+        [canvbig[i] removeFromSuperview];
+    }
 }
+
 
 - (void)drawline
 {
@@ -387,6 +684,26 @@
     
 }
 
+- (void)scaleButtonTouchUpInside {
+    
+    // <--- For blurring the BG --->
+    UIVisualEffect *blurEffect;
+    blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    visualEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    visualEffectView.frame = [[UIScreen mainScreen] bounds];
+    [self addSubview:visualEffectView];
+    
+    
+    // <--- Pop-up view asking height --->
+    UIAlertView *scalePopUp = [[UIAlertView alloc]initWithTitle:@"Scale Information" message:@"Please enter scale" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Done", nil];
+    scalePopUp.tag = 300;
+    [scalePopUp textFieldAtIndex:0].delegate = self;
+    scalePopUp.alertViewStyle = UIAlertViewStylePlainTextInput;
+    [[scalePopUp textFieldAtIndex:0] setKeyboardType:UIKeyboardTypeDecimalPad];
+    [[scalePopUp textFieldAtIndex:0] becomeFirstResponder];
+    [scalePopUp show];
+    
+}
 
 
 - (void) heightButtonTouchUpInside {
@@ -429,8 +746,14 @@
 - (void) yesButtonTouchUpInside {
     
     if ([height isEqualToString:@""] || [height floatValue] == 0 ) {
-        UIAlertView *alertPopUp = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Invalid Entry!"] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        UIAlertView *alertPopUp = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Invalid Height Entry!"] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
         alertPopUp.tag = 200;
+        [alertPopUp show];
+    }
+    
+    if ([scale isEqualToString:@""] || [scale intValue] == 0 ) {
+        UIAlertView *alertPopUp = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Invalid Scale Entry!"] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        alertPopUp.tag = 400;
         [alertPopUp show];
     }
     
@@ -484,11 +807,11 @@
             NSString *heightEntered = [alertView textFieldAtIndex:0].text;
             
             // <--- To validate the text box to ensure only one dot is present --->
-            NSString *expression = @"^([0-9]+)?([\\.]([0-9])+)?$";
+            NSString *expression = @"^([0-9]+)?([\\.]?([0-9])+)?$";
             NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:NSRegularExpressionCaseInsensitive error:nil];
             NSUInteger numberOfMatches = [regex numberOfMatchesInString:heightEntered options:0 range:NSMakeRange(0, [heightEntered length])];
             if (numberOfMatches == 0) {
-                UIAlertView *alertPopUp = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Invalid Entry!"] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                UIAlertView *alertPopUp = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Invalid Height Entry!"] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
                 alertPopUp.tag = 200;
                 [alertPopUp show];
                 [self noButtonTouchUpInside];
@@ -497,14 +820,14 @@
                 height = heightEntered;
                 [self yesButtonTouchUpInside];
             
-                // <--- Using NSUserDefaults for persistent storage --->
+                // <--- Using NSUserDefaults for persistent storage of Height--->
                 [[NSUserDefaults standardUserDefaults] setObject:height forKey:@"Height"];
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 NSLog(@"Height wrote: %@",height);
             }
         }
     }
-    if (alertView.tag == 200) { // Error pop-up with no value
+    if (alertView.tag == 200) { // Error pop-up with no value for height
         if (buttonIndex == 0) {  // Cancel Button
             
             [visualEffectView removeFromSuperview];
@@ -512,6 +835,43 @@
         }
     }
     
+    if (alertView.tag == 300) { // Scale input pop-up
+        if (buttonIndex == 0) {  // Cancel Button
+            [self noButtonTouchUpInside];
+        }
+        else if (buttonIndex == 1) {   // Done Button
+            
+            NSString *scaleEntered = [alertView textFieldAtIndex:0].text;
+            
+            // <--- To validate the text box to ensure only one dot is present --->
+            NSString *expression = @"^([0-9]+)?([\\.]?([0-9])+)?$";
+            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:NSRegularExpressionCaseInsensitive error:nil];
+            NSUInteger numberOfMatches = [regex numberOfMatchesInString:scaleEntered options:0 range:NSMakeRange(0, [scaleEntered length])];
+            
+            if (numberOfMatches == 0) {
+                UIAlertView *alertPopUp = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Invalid Scale Entry!"] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                alertPopUp.tag = 400;
+                [alertPopUp show];
+                [self noButtonTouchUpInside];
+            }
+            else {
+                scale = scaleEntered;
+                [self yesButtonTouchUpInside];
+                
+                // <--- Using NSUserDefaults for persistent storage of height value --->
+                [[NSUserDefaults standardUserDefaults] setObject:scale forKey:@"Scale"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
+                NSLog(@"Scale wrote: %@",scale);
+            }
+        }
+    }
+    if (alertView.tag == 400) { // Error pop-up with no value for Scale
+        if (buttonIndex == 0) {  // Cancel Button
+            [visualEffectView removeFromSuperview];
+            [self scaleButtonTouchUpInside];
+        }
+    }
     
     if (alertView.tag == 500) { // Distance and length pop-up
         if (buttonIndex == 0) {  // Reset Button

@@ -15,8 +15,10 @@
     UIView *popView;
     UIImagePickerController *picker;
     NSString *height;
+    NSString *scale;
     UIButton *heightButton;
     UIButton *endButton;
+    UIButton *closeButton;
     UIButton *snapButton;
     UIButton *scaleButton;
     UIImageView *overlayGraphicView;
@@ -47,6 +49,8 @@
     UIColor *strokeColor;
     UIView *canvasView;
     UIView *canvasViewbg;
+    UIView *canvasViewBig;
+    UIView *canvasViewbgBig;
 
 
     
@@ -62,11 +66,12 @@
     float lengthTwo;
     float distance;
     float heightInFloat;
-    
+    float scaleInFloat;
     int loop;
     int numberOfPoints; // Contains number of times snap is clicked.
     
     float pointsList[100][2]; // Contains the relative co-ordinate from zero plane
+    float pointsListBig[100][2];
     
     float lengthList[100]; // Contains the length from camera to each point
     float angleList[100]; // Contains the roll angle to each point. (Roll angle is horizontal angle)
@@ -78,6 +83,7 @@
 }
 
 
+-(int) ComputeOutCode:(double)x andnum2:(double)y andNum3:(double)xmin andNum4:(double)ymin andNum5:(double)xmax andNum6:(double)ymax;
 
 - (void)snapButtonTouchUpInside;
 - (void)heightButtonTouchUpInside;
