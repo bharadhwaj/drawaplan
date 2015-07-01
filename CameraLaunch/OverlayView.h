@@ -8,67 +8,68 @@
 
 #import <UIKit/UIKit.h>
 #import<CoreMotion/CoreMotion.h>
+#import <MessageUI/MessageUI.h>
 
+@protocol OverlayViewDelegate;
 
-@interface OverlayView : UIView <UITextFieldDelegate,UIPickerViewDelegate, UIPickerViewDataSource> {
+@interface OverlayView : UIView <UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UIGestureRecognizerDelegate> {
     
-    UIView *popView;
     UIImagePickerController *picker;
+    
+
+    UIView *lineView;
+    UIView *canvasView;
+    UIView *canvasViewbg;
+    UIView *canvasViewBig;
+    UIView *canvasViewbgBig;
+    
     NSString *height;
     NSString *scale;
+    NSString *imagePath;
+    
     UIButton *heightButton;
     UIButton *endButton;
     UIButton *closeButton;
     UIButton *snapButton;
     UIButton *scaleButton;
-    UIImageView *overlayGraphicView;
-    UIVisualEffectView *visualEffectView;
-    UITextField *heightText;
-    UILabel *myLabel;
-    UIView *lineView;
-    CMMotionManager *motionManager;
-    NSTimer *timer;
-    NSOperationQueue *operationQueue;
-    UILabel *yaw ;
-    UILabel *pitch;
-    UILabel *roll;
-    UILabel *length;
-    UILabel *heightLabel;
-    UILabel *snapLabel1;
-    UILabel *snapLabel2;
-    UILabel *snapLabel3;
-    UILabel *snapLabel4;
     
-    UIButton *back;
-
-    NSMutableArray *pathArray;
-    NSMutableDictionary *dict_path;
+    UIImageView *overlayGraphicView;
+    UIImageView *imageView;
+    UIImage *image;
+    
     CGPoint startPoint;
     CGPoint endPoint;
+    
+    
+    CGFloat cwidth;
+    CGFloat cheight;
+    CGFloat lastRotation;
+    CGFloat rotationTouch;
+    
+    UINavigationBar *navBar;
+    
+    UIToolbar *toolBar;
+    
+    UIVisualEffectView *visualEffectView;
+    
+    CMMotionManager *motionManager;
+    
+    NSTimer *timer;
+    
     UIBezierPath *myPath;
-    UIColor *strokeColor;
-    UIView *canvasView;
-    UIView *canvasViewbg;
-    UIView *canvasViewBig;
-    UIView *canvasViewbgBig;
 
-
+    UIRotationGestureRecognizer *rotationRecognizer;
+    
     
     float lengthFinal;
     float rollAngle;
     float pitchAngle;
     float yawAngle;
-    
     float angleOne;
-    float angleTwo;
-    float angleTotal;
+  
     float lengthOne;
-    float lengthTwo;
-    float distance;
     float heightInFloat;
     float scaleInFloat;
-    int loop;
-    int numberOfPoints; // Contains number of times snap is clicked.
     
     float pointsList[100][2]; // Contains the relative co-ordinate from zero plane
     float pointsListBig[100][2];
@@ -78,18 +79,29 @@
     
     float distanceList[100]; // Contains the distance between point n and point n-1
     float angleSweptList[100]; // Contains the angle swept between point n and point n-1
+    
+    int loop;
+    int numberOfPoints; // Contains number of times snap is clicked.
 
 
 }
 
+@property (nonatomic, strong) id<OverlayViewDelegate> delegate;
 
 -(int) ComputeOutCode:(double)x andnum2:(double)y andNum3:(double)xmin andNum4:(double)ymin andNum5:(double)xmax andNum6:(double)ymax;
-
 - (void)snapButtonTouchUpInside;
 - (void)heightButtonTouchUpInside;
 - (void)noButtonTouchUpInside;
 - (void)yesButtonTouchUpInside;
 - (void)endButtonTouchUpInside;
 - (void)scaleButtonTouchUpInside;
+
+
+@end
+
+// <--- For importing on ViewController.h -->
+@protocol OverlayViewDelegate <NSObject>
+
+-(void)finishButtonTouchUpInsideDelegate:(NSString*)imagePath;
 
 @end

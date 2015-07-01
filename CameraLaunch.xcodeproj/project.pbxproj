@@ -23,6 +23,7 @@
 		3F73A4E31B3C89F00015CA59 /* scalehighlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F73A4DD1B3C89F00015CA59 /* scalehighlight.png */; };
 		3F73A4E61B3C90170015CA59 /* close.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F73A4E41B3C90170015CA59 /* close.png */; };
 		3F73A4E71B3C90170015CA59 /* closehighlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F73A4E51B3C90170015CA59 /* closehighlight.png */; };
+		3FD883C41B43741C0099523F /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3FD883C31B43741C0099523F /* MessageUI.framework */; };
 		5AFEA8A51B3936A90088B021 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AFEA8A41B3936A90088B021 /* QuartzCore.framework */; };
 		5AFEA8A81B3941110088B021 /* canvas.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AFEA8A71B3941110088B021 /* canvas.m */; };
 		706B34DC1AEFAA760072FBB9 /* OverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 706B34DB1AEFAA760072FBB9 /* OverlayView.m */; };
@@ -61,10 +62,11 @@
 		3F73A4DD1B3C89F00015CA59 /* scalehighlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scalehighlight.png; sourceTree = "<group>"; };
 		3F73A4E41B3C90170015CA59 /* close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = close.png; sourceTree = "<group>"; };
 		3F73A4E51B3C90170015CA59 /* closehighlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = closehighlight.png; sourceTree = "<group>"; };
+		3FD883C31B43741C0099523F /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		3FD883C51B4382D60099523F /* OverlayView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OverlayView.h; sourceTree = "<group>"; };
 		5AFEA8A41B3936A90088B021 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		5AFEA8A61B3941110088B021 /* canvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = canvas.h; sourceTree = "<group>"; };
 		5AFEA8A71B3941110088B021 /* canvas.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = canvas.m; sourceTree = "<group>"; };
-		706B34DA1AEFAA760072FBB9 /* OverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayView.h; sourceTree = "<group>"; };
 		706B34DB1AEFAA760072FBB9 /* OverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OverlayView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -73,6 +75,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3FD883C41B43741C0099523F /* MessageUI.framework in Frameworks */,
 				5AFEA8A51B3936A90088B021 /* QuartzCore.framework in Frameworks */,
 				3F68AA2E1AEF5D960031C24E /* AVFoundation.framework in Frameworks */,
 			);
@@ -91,6 +94,7 @@
 		3F2A47551AEA3B010088B67A = {
 			isa = PBXGroup;
 			children = (
+				3FD883C31B43741C0099523F /* MessageUI.framework */,
 				5AFEA8A41B3936A90088B021 /* QuartzCore.framework */,
 				3F68AA2D1AEF5D960031C24E /* AVFoundation.framework */,
 				3F2A47601AEA3B010088B67A /* CameraLaunch */,
@@ -115,7 +119,7 @@
 				3F2A47661AEA3B010088B67A /* AppDelegate.m */,
 				3F2A47681AEA3B010088B67A /* ViewController.h */,
 				3F2A47691AEA3B010088B67A /* ViewController.m */,
-				706B34DA1AEFAA760072FBB9 /* OverlayView.h */,
+				3FD883C51B4382D60099523F /* OverlayView.h */,
 				706B34DB1AEFAA760072FBB9 /* OverlayView.m */,
 				5AFEA8A61B3941110088B021 /* canvas.h */,
 				5AFEA8A71B3941110088B021 /* canvas.m */,
@@ -405,7 +409,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: PRATHAPAN SETHUMAPHAVAN (YBMVHB2Q9N)";
 				INFOPLIST_FILE = CameraLaunch/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "d401220a-86d8-4b94-9be9-02d042724b53";
@@ -420,7 +424,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer: PRATHAPAN SETHUMAPHAVAN (YBMVHB2Q9N)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: PRATHAPAN SETHUMAPHAVAN (YBMVHB2Q9N)";
 				INFOPLIST_FILE = CameraLaunch/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "d401220a-86d8-4b94-9be9-02d042724b53";

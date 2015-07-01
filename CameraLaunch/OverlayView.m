@@ -12,9 +12,6 @@
 #import<QuartzCore/QuartzCore.h>
 #import "canvas.h"
 
-
-
-
 #define degrees(x) (180 * x / M_PI)
 #define pixel 37.795276
 
@@ -22,19 +19,22 @@
 
     canvas *canv[50];
     canvas *canvbig[50];
+
     int count;
 
+    typedef int OutCode;
 
-typedef int OutCode;
+    // <--- Area code for Cohen Sutherland Algorithm -->
+    const int INSIDE = 0; // 0000
+    const int LEFT = 1;   // 0001
+    const int RIGHT = 2;  // 0010
+    const int BOTTOM = 4; // 0100
+    const int TOP = 8;    // 1000
 
-const int INSIDE = 0; // 0000
-const int LEFT = 1;   // 0001
-const int RIGHT = 2;  // 0010
-const int BOTTOM = 4; // 0100
-const int TOP = 8;    // 1000
+    @synthesize delegate;
 
--(int) ComputeOutCode:(double)x andnum2:(double)y andNum3:(double)xmin andNum4:(double)ymin andNum5:(double)xmax andNum6:(double)ymax;
-{
+
+-(int) ComputeOutCode:(double)x andnum2:(double)y andNum3:(double)xmin andNum4:(double)ymin andNum5:(double)xmax andNum6:(double)ymax; {
     OutCode code;
     
     code = INSIDE;          // initialised as being inside of clip window
@@ -53,16 +53,22 @@ const int TOP = 8;    // 1000
 
 
 
-    - (id)initWithFrame:(CGRect)frame {
-    
-    if ((self = [super initWithFrame:frame])) {
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
         
+        height = @"1";
+        scale = @"1";
+        
+        // <--- Screen's width and height --->
+        cwidth = [UIScreen mainScreen].bounds.size.width;
+        cheight = [UIScreen mainScreen].bounds.size.height;
+        
+        // <--- Reseting count --->
         count = -1;
        
         // <--- Reading height from NSUserDefaults --->
         height = [[NSUserDefaults standardUserDefaults] stringForKey:@"Height"];
         heightInFloat = [height floatValue];
-        
         
         // <--- Reading scale from NSUserDefaults --->
         scale = [[NSUserDefaults standardUserDefaults] stringForKey:@"Scale"];
@@ -72,22 +78,16 @@ const int TOP = 8;    // 1000
         if(height != nil & scale != nil) {
             [self yesButtonTouchUpInside];
         }
-        
-        
-        
+      
+    
         NSLog(@"Height read: %@",height);
         NSLog(@"Scale read: %@",scale);
-        
         
         //<--- Clear the background of the overlay --->
         self.opaque = NO;
         self.backgroundColor = [UIColor clearColor];
         
-        
         //<--- For the cross hair on camera view --->
-        CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
-        CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
-               
         lineView = [[UIView alloc] initWithFrame:CGRectMake(0, cheight/2.0, cwidth, 1)];
         lineView.backgroundColor = [UIColor colorWithRed:0.345 green:0.345 blue:0.345 alpha:1];
         [self addSubview:lineView];
@@ -98,13 +98,13 @@ const int TOP = 8;    // 1000
         
         
         //<--- For Navigation bar at the top --->
-        UINavigationBar *navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, cwidth, 40)];
+        navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, cwidth, 40)];
         navBar.barTintColor = [UIColor colorWithRed:0.627 green:0.627 blue:0.627 alpha:1];
         [self addSubview:navBar];
         
         
         //<--- For Toolbar at the bottom --->
-        UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, cheight-40, cwidth, 40)];
+        toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, cheight-40, cwidth, 40)];
         toolBar.barTintColor = [UIColor colorWithRed:0.627 green:0.627 blue:0.627 alpha:1];
         [self addSubview:toolBar];
         
@@ -146,47 +146,6 @@ const int TOP = 8;    // 1000
     scale = [[NSUserDefaults standardUserDefaults] stringForKey:@"Scale"];
     scaleInFloat = [scale floatValue];
     
-    
-    CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
-    CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
-    
-    CGFloat xWmin, xWmax, yWmin, yWmax, xVmin, xVmax, yVmin, yVmax;
-    CGFloat xVminBig, xVmaxBig, yVminBig, yVmaxBig;
-    
-    CGFloat sx, sy, tx, ty;
-    CGFloat txBig, tyBig, sxbig, sybig;
-    
-    // <--- Translation and Scaling to map the point --->
-    xWmin = 0;
-    xWmax = cwidth;
-    yWmin = 0;
-    yWmax = cheight;
-    
-    xVmin = cwidth/2;
-    xVmax = cwidth;
-    yVmin = cheight/2;
-    yVmax = cheight;
-    
-    xVminBig = 15;
-    xVmaxBig = cwidth-10;
-    yVminBig = 55;
-    yVmaxBig = cheight-50;
-
-    
-    sx=(xVmax-xVmin)/(xWmax-xWmin);
-    sy=(yVmax-yVmin)/(yWmax-yWmin);
-    
-    sxbig=(xVmaxBig-xVminBig)/(xWmax-xWmin);
-    sybig=(yVmaxBig-yVminBig)/(yWmax-yWmin);
-    
-    tx = (xWmax*xVmin - xWmin*xVmax)/(xWmax - xWmin);
-    ty = (yWmax*yVmin - yWmin*yVmax)/(yWmax - yWmin);
-    
-    txBig = (xWmax*xVminBig - xWmin*xVmaxBig)/(xWmax - xWmin);
-    tyBig = (yWmax*yVminBig - yWmin*yVmaxBig)/(yWmax - yWmin);
-    
-    
-    
     angleOne = rollAngle*180/M_PI;
     
     lengthOne = [self read];
@@ -196,36 +155,26 @@ const int TOP = 8;    // 1000
     
     float angle = angleList[0];
 
-    
-    
-    pointsList[count][0] =  -1 * sqrtf(2.0) * lengthOne * (pixel/scaleInFloat) * sinf((angleOne-angle)*M_PI/180)+(cwidth/2);
-    if (pointsList[count][0] < 0) {
+    pointsList[count][0] = -1 * sqrtf(2.0) * lengthOne * (pixel/scaleInFloat) * sinf((angleOne-angle)*M_PI/180)+(cwidth/2);
+    if (pointsList[count][0] < 0)
         pointsList[count][0] = -1 * pointsList[count][0];
-    }
-    
-    pointsListBig[count][0] =  pointsList[count][0];
-    pointsList[count][0] =  sx * pointsList[count][0] + cwidth/2 + 15;
+    pointsListBig[count][0] = pointsList[count][0];
+    pointsList[count][0] = 0.5 * pointsList[count][0] + cwidth/2 + 15;
     
     pointsList[count][1] = -1 * sqrtf(2.0) * lengthOne * (pixel/scaleInFloat) * cosf((angleOne-angle)*M_PI/180)+(cheight/2);
-    if (pointsList[count][1] < 0) {
+    if (pointsList[count][1] < 0)
         pointsList[count][1] = -1 * pointsList[count][1];
-    }
-        pointsListBig[count][1] =   pointsList[count][1];
-    pointsList[count][1] =  sy * pointsList[count][1] + cheight/2 + 45;
-    NSLog(@"Sx: %f \n Sy: %f \n SxBig: %f \n SyBig: %f",sx,sy,sxbig,sybig);
-    NSLog(@"Tx: %f \n Ty: %f \n TxBig: %f \n TyBig: %f",tx,ty,txBig,tyBig);
-    NSLog(@"Point %d X: %f",count,pointsListBig[count][0]);
-    NSLog(@"Point %d Y: %f",count,pointsListBig[count][1]);
+    pointsListBig[count][1] = pointsList[count][1];
+    pointsList[count][1] = 0.5 * pointsList[count][1] + cheight/2 + 45;
     
     if(count >= 1) {
         int j;
         int p = count - 1;
         int q = count;
         numberOfPoints = count+1;
-        
-
-
+    
         if(count == 1) {
+            
             // <--- Small canvas border -->
             canvasViewbg=[[UIView alloc]initWithFrame:CGRectMake(cwidth/2+10, cheight/2+40, cwidth/2-20, cheight/2-90)];
             [canvasViewbg setBackgroundColor: [UIColor colorWithRed:0.059 green:0.059 blue:0.059 alpha:1]];
@@ -233,6 +182,7 @@ const int TOP = 8;    // 1000
             canvasView=[[UIView alloc]initWithFrame:CGRectMake(cwidth/2+15, cheight/2+45, cwidth/2-30, cheight/2-100)];
             [canvasView setBackgroundColor: [UIColor colorWithRed:0.227 green:0.227 blue:0.227 alpha:1]];
             [self addSubview:canvasView];
+            
         }
         
         for(int i = 0; i < numberOfPoints; i++) {
@@ -252,23 +202,20 @@ const int TOP = 8;    // 1000
             // C^2 = A^2 + B^2 - 2.A.B.cos(c)
             distanceList[i] = sqrtf((lengthList[i]*lengthList[i])+(lengthList[j]*lengthList[j])-(2.0*lengthList[i]*lengthList[j]*cosf(angleSweptList[i]*M_PI/180)));
             
-            //NSLog(@"AngleTotal %d = %f",i,angleSweptList[i]);
-            //NSLog(@"DistanceTotal %d = %f",i,distanceList[i]);
-            
         }
 
         
         //cohen sutherlan algorithm
         
-        int xmin=cwidth/2+15;
-        int ymin=cheight/2+45;
-        int xmax=cwidth-15;
-        int ymax=cheight-55;
+        int xmin = cwidth/2+15;
+        int ymin = cheight/2+45;
+        int xmax = cwidth-15;
+        int ymax = cheight-55;
         
-        int x0=pointsList[p][0];
-        int y0=pointsList[p][1];
-        int x1=pointsList[q][0];
-        int y1=pointsList[q][1];
+        int x0 = pointsList[p][0];
+        int y0 = pointsList[p][1];
+        int x1 = pointsList[q][0];
+        int y1 = pointsList[q][1];
         [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
         
         OutCode outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
@@ -280,9 +227,11 @@ const int TOP = 8;    // 1000
             if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
                 accept = true;
                 break;
-            } else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
+            }
+            else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
                 break;
-            } else {
+            }
+            else {
                 // failed both tests, so calculate the line segment to clip
                 // from an outside point to an intersection with clip edge
                 double x=0, y=0;
@@ -295,13 +244,16 @@ const int TOP = 8;    // 1000
                 if (outcodeOut & TOP) {           // point is above the clip rectangle
                     x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
                     y = ymax;
-                } else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
+                }
+                else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
                     x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
                     y = ymin;
-                } else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
+                }
+                else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
                     y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
                     x = xmax;
-                } else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
+                }
+                else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
                     y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
                     x = xmin;
                 }
@@ -325,30 +277,13 @@ const int TOP = 8;    // 1000
             // their platform (OpenGL/graphics.h etc.)
             
             // LineSegment(x0, y0, x1, y1);
-            CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
-            CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
+            
             NSLog(@"dist%f ",distanceList[count-1]);
             canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: x0 withStartY: y0 withEndX: x1 withEndY: y1 withdist:distanceList[count-1]];
             [self addSubview:canv[count-1]];
             [canv[count-1] setNeedsDisplay];
             
         }
-
-        
-        //<--- Checking whether the point to draw is out of bound. --->
-        /*if(pointsList[p][0] < cwidth/2+15 || pointsList[p][0] > cwidth - 15 || pointsList[p][1] > cheight - 55 || pointsList[p][1] < cheight/2 + 55 || pointsList[q][0] < cwidth/2 + 15 || pointsList[q][0] > cwidth - 15 || pointsList[q][1] > cheight - 55 || pointsList[q][1] < cheight/2 + 55) {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Cannot draw. Point out of drawing area." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-            [alert show];
-            count--;
-    
-        }
-        else {*/
-         
-            /* canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsList[p][0] withStartY: pointsList[p][1] withEndX: pointsList[q][0] withEndY: pointsList[q][1] withdist:distanceList[count-1]];
-            [self addSubview:canv[count-1]];
-            [canv[count-1] setNeedsDisplay];
-        //}
-        */
         
     }
         
@@ -377,18 +312,12 @@ const int TOP = 8;    // 1000
         [endButton setImage:endHighlightImage forState:UIControlStateHighlighted];
         [endButton addTarget:self action:@selector(endButtonTouchUpInside) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:endButton];
+        
     }
-    
-    
-    
-    
 }
 
 - (void)endButtonTouchUpInside {
-    
-    
-    CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
-    CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
+
     
     // <--- For blurring the BG --->
     UIVisualEffect *blurEffect;
@@ -398,12 +327,12 @@ const int TOP = 8;    // 1000
     [self addSubview:visualEffectView];
     
     //<--- For Navigation bar at the top --->
-    UINavigationBar *navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, cwidth, 40)];
+    navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, cwidth, 40)];
     navBar.barTintColor = [UIColor colorWithRed:0.627 green:0.627 blue:0.627 alpha:1];
     [self addSubview:navBar];
     
     //<--- For Toolbar at the bottom --->
-    UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, cheight-40, cwidth, 40)];
+    toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, cheight-40, cwidth, 40)];
     toolBar.barTintColor = [UIColor colorWithRed:0.627 green:0.627 blue:0.627 alpha:1];
     [self addSubview:toolBar];
     
@@ -427,9 +356,7 @@ const int TOP = 8;    // 1000
         // <--- Removing old small canvas --->
         [canv[p] removeFromSuperview];
         
-        
         // <--- Cohen-Sutherland algorithm --->
-        
         int xmin = 15;
         int ymin = 55;
         int xmax = cwidth - 15;
@@ -495,26 +422,12 @@ const int TOP = 8;    // 1000
             // their platform (OpenGL/graphics.h etc.)
             
             // LineSegment(x0, y0, x1, y1);
-            CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
-            CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
-            NSLog(@"dist%f ",distanceList[count-1]);
+   
             canvbig[p] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: x0 withStartY: y0 withEndX: x1 withEndY: y1 withdist:distanceList[p]];
             [self addSubview:canvbig[p]];
             [canvbig[p] setNeedsDisplay];
             
         }
-
-        
-        
-        
-        
-        
-        
-        
-        // <--- Adding new big canvas --->
-       /* canvbig[p] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsListBig[p][0] withStartY: pointsListBig[p][1] withEndX: pointsListBig[q][0] withEndY: pointsListBig[q][1] withdist: distanceList[p]];
-        [self addSubview:canvbig[p]];
-        [canvbig[p] setNeedsDisplay];*/
     }
     
     //<--- For close button after clicking end--->
@@ -529,18 +442,53 @@ const int TOP = 8;    // 1000
     [closeButton addTarget:self action:@selector(closeButtonTouchUpInside) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:closeButton];
     
+    // <--- Rotate Gesture --->
+    rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotate:)];
+    [self addGestureRecognizer:rotationRecognizer];
+    
+    // <--- Reseting the count back to NIL --->
     count = -1;
 
 }
 
 - (void)closeButtonTouchUpInside {
     
+    
+    [self addSubview:navBar];
+    [self addSubview:toolBar];
     [self addSubview:heightButton];
     [self addSubview:scaleButton];
-    [canvasViewbgBig removeFromSuperview];
-    [canvasViewBig removeFromSuperview];
+    [self addSubview:snapButton];
+    
+    // <--- For Printing image --->
+    CGRect imageRect = CGRectMake(10, 50, cwidth-20, cheight-100);
+    UIGraphicsBeginImageContext(imageRect.size);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(ctx, -imageRect.origin.x, -imageRect.origin.y);
+    [self.layer renderInContext:UIGraphicsGetCurrentContext()];
+    image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
     [visualEffectView removeFromSuperview];
+    [snapButton removeFromSuperview];
+    [canvasViewbgBig removeFromSuperview];
     [closeButton removeFromSuperview];
+    
+    // <--- Writing the subview as Image --->
+    NSData* imageData = UIImageJPEGRepresentation(image, 1.0);
+    imagePath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"/BluePrintImageInitial.jpg"];
+    [imageData writeToFile:imagePath atomically:YES];
+    
+    // <--- For sending mail. Definition on ViewController.m -->
+    [delegate finishButtonTouchUpInsideDelegate:imagePath];
+    
+    UIImage *customImage = [UIImage imageWithContentsOfFile:imagePath];
+    
+    // <--- Displaying the new image --->
+    imageView = [[UIImageView alloc] init];
+    imageView.image = customImage;
+    imageView.frame = CGRectMake(150, 220, cwidth-300, cheight-440); // pass your frame here
+    [self addSubview:imageView];
     
     // <--- For removing large canvas --->
     for(int i = 0; i < loop; i++) {
@@ -549,31 +497,34 @@ const int TOP = 8;    // 1000
 }
 
 
-- (void)drawline
-{
+-(void)rotate:(id)sender {
+
+    if([(UIRotationGestureRecognizer*)sender state] == UIGestureRecognizerStateEnded) {
+        lastRotation = 0.0;
+        return;
+    }
+    
+    rotationTouch = 0.0 - (lastRotation - [(UIRotationGestureRecognizer*)sender rotation]);
+    
+    
+    
+    for(int i = 0; i < loop; i++) {
+        CGAffineTransform currentTransform = canvbig[i].transform;
+        CGAffineTransform newTransform = CGAffineTransformRotate(currentTransform,rotationTouch);
+        [canvbig[i] setTransform:newTransform];
+    }
+    
+    
+    lastRotation = [(UIRotationGestureRecognizer*)sender rotation];
+}
+
+- (void)drawline {
     endPoint.x = 500;
     endPoint.y = 500;
-    
-   // [myPath removeAllPoints];
-   // [dict_path removeAllObjects];// remove prev object in dict (this dict is used for current drawing, All past drawings are managed by pathArry)
     
     //<--- Actual drawing --->
     [myPath moveToPoint:startPoint];
     [myPath addLineToPoint:endPoint];
-    
-    //[dict_path setValue:myPath forKey:@"path"];
-    //[dict_path setValue:strokeColor forKey:@"color"];
-    
-    //NSDictionary *tempDict = [NSDictionary dictionaryWithDictionary:dict_path];
-    //[pathArray addObject:tempDict];
-    //[dict_path removeAllObjects];
-    //s[self.view setNeedsDisplay];
-    //startPoint=endPoint;
-    //NSDictionary *tempDict = [NSDictionary dictionaryWithDictionary:dict_path];
-    //[pathArray addObject:tempDict];
-    //[dict_path removeAllObjects];
-    //[self->canvas setNeedsDisplay];
-    
     
 }
 
@@ -623,11 +574,6 @@ const int TOP = 8;    // 1000
     CMDeviceMotion *motion = motionManager.deviceMotion;
     attitude = motion.attitude;
     
-    //CMQuaternion quat = motionManager.deviceMotion.attitude.quaternion;
-    //rolldeg = degrees(atan2(2*(quat.y*quat.w - quat.x*quat.z), 1 - 2*quat.y*quat.y - 2*quat.z*quat.z)) ;
-    //pitchdeg = degrees(atan2(2*(quat.x*quat.w + quat.y*quat.z), 1 - 2*quat.x*quat.x - 2*quat.z*quat.z));
-    //yawdeg = degrees(asin(2*quat.x*quat.y + 2*quat.w*quat.z));
-    
     float rollRadian=[self walkaroundAngleFromAttitude:attitude fromHomeAngle:0];
 
     
@@ -639,49 +585,10 @@ const int TOP = 8;    // 1000
     // <--- Obtaining height entered in text box from Alertview function --->
     heightInFloat = [height floatValue];
    
-    // <--- Displaying Yaw, Pitch and Roll on screen --->
-    /*NSString *yawstring = [NSString stringWithFormat:@"Yaw: %f",attitude.yaw*180/M_PI];
-    yaw = [[UILabel alloc]initWithFrame:CGRectMake(10, 80, 170, 30)];
-    [yaw setBackgroundColor:[UIColor blackColor]];
-    yaw.text = yawstring;
-    yaw.textColor = [UIColor whiteColor];
-    
-    NSString *pitchstring = [NSString stringWithFormat:@"Pitch: %f",attitude.pitch*180/M_PI];
-    pitch = [[UILabel alloc]initWithFrame:CGRectMake(10, 110, 170, 30)];
-    [pitch setBackgroundColor:[UIColor blackColor]];
-    pitch.text =pitchstring;
-    pitch.textColor = [UIColor whiteColor];
-    
-    NSString *rollstring = [NSString stringWithFormat:@"Roll: %f",rollRadian*180/M_PI];
-    roll = [[UILabel alloc]initWithFrame:CGRectMake(10, 50, 170, 30)];
-    [roll setBackgroundColor:[UIColor blackColor]];
-    roll.text = rollstring;
-    roll.textColor = [UIColor whiteColor];
-    
-    NSString *len = [NSString stringWithFormat:@"Length: %f",tan(pitchAngle)*heightInFloat];
-    length = [[UILabel alloc]initWithFrame:CGRectMake(10, 140, 170, 30)];
-    [length setBackgroundColor:[UIColor blackColor]];
-    length.text = len;
-    length.textColor = [UIColor whiteColor];
-    
-    NSString *heightLab = [NSString stringWithFormat:@"Height: %f",heightInFloat];
-    heightLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 170, 170, 30)];
-    [heightLabel setBackgroundColor:[UIColor blackColor]];
-    heightLabel.text = heightLab;
-    heightLabel.textColor = [UIColor whiteColor];*/
-    
-    //[self addSubview:yaw];
-    //[self addSubview:pitch];
-    //[self addSubview:roll];
-    //[self addSubview:length];
-    //[self addSubview:heightLabel];
-
     // <-- Distance to the point on cross hair --->
     lengthFinal = tan(pitchAngle) * heightInFloat;
     
     return lengthFinal;
-    
-    
 }
 
 - (void)scaleButtonTouchUpInside {
@@ -694,10 +601,9 @@ const int TOP = 8;    // 1000
     [self addSubview:visualEffectView];
     
     
-    // <--- Pop-up view asking height --->
+    // <--- Pop-up view asking scale --->
     UIAlertView *scalePopUp = [[UIAlertView alloc]initWithTitle:@"Scale Information" message:@"Please enter scale" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Done", nil];
     scalePopUp.tag = 300;
-    [scalePopUp textFieldAtIndex:0].delegate = self;
     scalePopUp.alertViewStyle = UIAlertViewStylePlainTextInput;
     [[scalePopUp textFieldAtIndex:0] setKeyboardType:UIKeyboardTypeDecimalPad];
     [[scalePopUp textFieldAtIndex:0] becomeFirstResponder];
@@ -707,13 +613,6 @@ const int TOP = 8;    // 1000
 
 
 - (void) heightButtonTouchUpInside {
-    
-    // <--- Removing the Yaw, Pitch, Roll and Length --->
-    //[yaw removeFromSuperview];
-    //[pitch removeFromSuperview];
-    //[roll removeFromSuperview];
-    //[length removeFromSuperview];
-    //[heightLabel removeFromSuperview];
      
     // <--- For blurring the BG --->
     UIVisualEffect *blurEffect;
@@ -726,11 +625,11 @@ const int TOP = 8;    // 1000
     // <--- Pop-up view asking height --->
     UIAlertView *heightPopUp = [[UIAlertView alloc]initWithTitle:@"Height Information" message:@"Please enter height" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Done", nil];
     heightPopUp.tag = 100;
-    [heightPopUp textFieldAtIndex:0].delegate = self;
     heightPopUp.alertViewStyle = UIAlertViewStylePlainTextInput;
     [[heightPopUp textFieldAtIndex:0] setKeyboardType:UIKeyboardTypeDecimalPad];
     [[heightPopUp textFieldAtIndex:0] becomeFirstResponder];
     [heightPopUp show];
+    
 
 }
 
@@ -759,17 +658,8 @@ const int TOP = 8;    // 1000
     
     else {
         
-        CGFloat cwidth = [UIScreen mainScreen].bounds.size.width;
-        CGFloat cheight = [UIScreen mainScreen].bounds.size.height;
-        
-
-        
         //<--- Snap Button --->
         snapButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 41, cwidth, cheight-41)];
-      //utton setTitle:@""  forState:UIControlStateNormal];
-       // snapButton.layer.cornerRadius = 3;
-       // snapButton.layer.borderWidth = 1;
-       // snapButton.layer.borderColor = UIColor.blackColor.CGColor;
         snapButton.backgroundColor = [UIColor clearColor];
         [snapButton addTarget:self action:@selector(snapButtonTouchUpInside) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:snapButton];
@@ -780,16 +670,14 @@ const int TOP = 8;    // 1000
     
         //<---- Gyro values --->
         motionManager = [[CMMotionManager alloc] init];
-        motionManager.deviceMotionUpdateInterval = 1;
+        motionManager.deviceMotionUpdateInterval = .01;
         [motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical];
-        timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(read) userInfo:nil repeats:YES];
+        timer = [NSTimer scheduledTimerWithTimeInterval:.01 target:self selector:@selector(read) userInfo:nil repeats:YES];
     
         // <--- Checking whether Gyro is available on the device --->
         if(![motionManager isGyroAvailable]){
-        
             UIAlertView *alert=[[UIAlertView alloc] initWithTitle: @"Error" message:@"No Gyroscope found!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
             [alert show];
-        
         }
     }
 
@@ -875,6 +763,7 @@ const int TOP = 8;    // 1000
     
     if (alertView.tag == 500) { // Distance and length pop-up
         if (buttonIndex == 0) {  // Reset Button
+            
             // <--- For changing names of button when snap is taken --->
             [snapButton setTitle:@""  forState:UIControlStateNormal];
             [self addSubview:snapButton];

@@ -8,8 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreMotion/CoreMotion.h>
+#import "OverlayView.h"
 
-@interface ViewController : UIViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
+@interface ViewController : UIViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate,OverlayViewDelegate,MFMailComposeViewControllerDelegate> {
     
     UIImagePickerController *picker;
 
