@@ -22,42 +22,11 @@
 
     int count;
 
-    typedef int OutCode;
-
-    // <--- Area code for Cohen Sutherland Algorithm -->
-    const int INSIDE = 0; // 0000
-    const int LEFT = 1;   // 0001
-    const int RIGHT = 2;  // 0010
-    const int BOTTOM = 4; // 0100
-    const int TOP = 8;    // 1000
-
     @synthesize delegate;
-
-
--(int) ComputeOutCode:(double)x andnum2:(double)y andNum3:(double)xmin andNum4:(double)ymin andNum5:(double)xmax andNum6:(double)ymax; {
-    OutCode code;
-    
-    code = INSIDE;          // initialised as being inside of clip window
-    
-    if (x < xmin)           // to the left of clip window
-        code |= LEFT;
-    else if (x > xmax)      // to the right of clip window
-        code |= RIGHT;
-    if (y < ymin)           // below the clip window
-        code |= BOTTOM;
-    else if (y > ymax)      // above the clip window
-        code |= TOP;
-    
-    return code;
-}
-
 
 
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        
-        height = @"1";
-        scale = @"1";
         
         // <--- Screen's width and height --->
         cwidth = [UIScreen mainScreen].bounds.size.width;
@@ -179,10 +148,19 @@
             canvasViewbg=[[UIView alloc]initWithFrame:CGRectMake(cwidth/2+10, cheight/2+40, cwidth/2-20, cheight/2-90)];
             [canvasViewbg setBackgroundColor: [UIColor colorWithRed:0.059 green:0.059 blue:0.059 alpha:1]];
             [self addSubview:canvasViewbg];
+            
+            
             canvasView=[[UIView alloc]initWithFrame:CGRectMake(cwidth/2+15, cheight/2+45, cwidth/2-30, cheight/2-100)];
             [canvasView setBackgroundColor: [UIColor colorWithRed:0.227 green:0.227 blue:0.227 alpha:1]];
             [self addSubview:canvasView];
             
+            // <--- Pinch Gesture --->
+            pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(scale:)];
+            [self addGestureRecognizer:pinchRecognizer];
+            
+            // <--- Pan Gesture --->
+            panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveSmall:)];
+            [self addGestureRecognizer:panRecognizer];
         }
         
         for(int i = 0; i < numberOfPoints; i++) {
@@ -203,87 +181,11 @@
             distanceList[i] = sqrtf((lengthList[i]*lengthList[i])+(lengthList[j]*lengthList[j])-(2.0*lengthList[i]*lengthList[j]*cosf(angleSweptList[i]*M_PI/180)));
             
         }
-
         
-        //cohen sutherlan algorithm
-        
-        int xmin = cwidth/2+15;
-        int ymin = cheight/2+45;
-        int xmax = cwidth-15;
-        int ymax = cheight-55;
-        
-        int x0 = pointsList[p][0];
-        int y0 = pointsList[p][1];
-        int x1 = pointsList[q][0];
-        int y1 = pointsList[q][1];
-        [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-        
-        OutCode outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-        OutCode outcode1 = [self ComputeOutCode:x1 andnum2:y1 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-        
-        bool accept = false;
-        
-        while (true) {
-            if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
-                accept = true;
-                break;
-            }
-            else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
-                break;
-            }
-            else {
-                // failed both tests, so calculate the line segment to clip
-                // from an outside point to an intersection with clip edge
-                double x=0, y=0;
-                
-                // At least one endpoint is outside the clip rectangle; pick it.
-                OutCode outcodeOut = outcode0 ? outcode0 : outcode1;
-                
-                // Now find the intersection point;
-                // use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
-                if (outcodeOut & TOP) {           // point is above the clip rectangle
-                    x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
-                    y = ymax;
-                }
-                else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
-                    x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
-                    y = ymin;
-                }
-                else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
-                    y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
-                    x = xmax;
-                }
-                else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
-                    y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
-                    x = xmin;
-                }
-                
-                // Now we move outside point to intersection point to clip
-                // and get ready for next pass.
-                if (outcodeOut == outcode0) {
-                    x0 = x;
-                    y0 = y;
-                    outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-                    
-                } else {
-                    x1 = x;
-                    y1 = y;
-                    outcode1 = [self ComputeOutCode:x1 andnum2:y1 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-                }
-            }
-        }
-        if (accept) {
-            // Following functions are left for implementation by user based on
-            // their platform (OpenGL/graphics.h etc.)
+        canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsList[p][0] withStartY: pointsList[p][1] withEndX: pointsList[q][0] withEndY: pointsList[q][1] withdist:distanceList[count-1]];
+        [self addSubview:canv[count-1]];
+        [canv[count-1] setNeedsDisplay];
             
-            // LineSegment(x0, y0, x1, y1);
-            
-            NSLog(@"dist%f ",distanceList[count-1]);
-            canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: x0 withStartY: y0 withEndX: x1 withEndY: y1 withdist:distanceList[count-1]];
-            [self addSubview:canv[count-1]];
-            [canv[count-1] setNeedsDisplay];
-            
-        }
         
     }
         
@@ -313,6 +215,48 @@
         [endButton addTarget:self action:@selector(endButtonTouchUpInside) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:endButton];
         
+    }
+}
+
+-(void)scale:(id)sender {
+    
+    if([(UIPinchGestureRecognizer*)sender state] == UIGestureRecognizerStateBegan) {
+        lastScale = 1.0;
+    }
+    
+    for(int i = 0; i < loop; i++) {
+        CGFloat scales = 1.0 - (lastScale - [(UIPinchGestureRecognizer*)sender scale]);
+        CGAffineTransform currentTransform = canv[i].transform;
+        CGAffineTransform newTransform = CGAffineTransformScale(currentTransform, scales, scales);
+        [canv[i] setTransform:newTransform];
+    }
+    
+    lastScale = [(UIPinchGestureRecognizer*)sender scale];
+}
+
+-(void)moveSmall:(id)sender {
+    
+    for(int i = 0; i < loop; i++) {
+        CGPoint translatedPoint = [(UIPanGestureRecognizer*)sender translationInView:canv[i]];
+        if([(UIPanGestureRecognizer*)sender state] == UIGestureRecognizerStateBegan) {
+            firstX = [canv[i] center].x;
+            firstY = [canv[i] center].y;
+        }
+        translatedPoint = CGPointMake(firstX+translatedPoint.x, firstY+translatedPoint.y);
+        [canv[i] setCenter:translatedPoint];
+    }
+}
+
+-(void)moveBig:(id)sender {
+    
+    for(int i = 0; i < loop; i++) {
+        CGPoint translatedPoint = [(UIPanGestureRecognizer*)sender translationInView:canv[i]];
+        if([(UIPanGestureRecognizer*)sender state] == UIGestureRecognizerStateBegan) {
+            firstXBig = [canvbig[i] center].x;
+            firstYBig = [canvbig[i] center].y;
+        }
+        translatedPoint = CGPointMake(firstX+translatedPoint.x, firstY+translatedPoint.y);
+        [canvbig[i] setCenter:translatedPoint];
     }
 }
 
@@ -355,79 +299,12 @@
         
         // <--- Removing old small canvas --->
         [canv[p] removeFromSuperview];
-        
-        // <--- Cohen-Sutherland algorithm --->
-        int xmin = 15;
-        int ymin = 55;
-        int xmax = cwidth - 15;
-        int ymax = cheight - 55;
-        
-        int x0 = pointsListBig[p][0];
-        int y0 = pointsListBig[p][1];
-        int x1 = pointsListBig[q][0];
-        int y1 = pointsListBig[q][1];
-        [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-        
-        OutCode outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-        OutCode outcode1 = [self ComputeOutCode:x1 andnum2:y1 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-        
-        bool accept = false;
-        
-        while (true) {
-            if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
-                accept = true;
-                break;
-            } else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
-                break;
-            } else {
-                // Failed both tests, so calculate the line segment to clip
-                // From an outside point to an intersection with clip edge
-                double x=0, y=0;
-                
-                // At least one endpoint is outside the clip rectangle; pick it.
-                OutCode outcodeOut = outcode0 ? outcode0 : outcode1;
-                
-                // Now find the intersection point;
-                // Use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
-                if (outcodeOut & TOP) {           // point is above the clip rectangle
-                    x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
-                    y = ymax;
-                } else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
-                    x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
-                    y = ymin;
-                } else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
-                    y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
-                    x = xmax;
-                } else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
-                    y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
-                    x = xmin;
-                }
-                
-                // Now we move outside point to intersection point to clip
-                // and get ready for next pass.
-                if (outcodeOut == outcode0) {
-                    x0 = x;
-                    y0 = y;
-                    outcode0 = [self ComputeOutCode:x0 andnum2:y0 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-                    
-                } else {
-                    x1 = x;
-                    y1 = y;
-                    outcode1 = [self ComputeOutCode:x1 andnum2:y1 andNum3:xmin andNum4:ymin andNum5:xmax andNum6:ymax];
-                }
-            }
-        }
-        if (accept) {
-            // Following functions are left for implementation by user based on
-            // their platform (OpenGL/graphics.h etc.)
+
+        canvbig[p] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsListBig[p][0] withStartY: pointsListBig[p][1] withEndX: pointsListBig[q][0] withEndY: pointsListBig[q][1] withdist:distanceList[p]];
+        [self addSubview:canvbig[p]];
+        [canvbig[p] setNeedsDisplay];
             
-            // LineSegment(x0, y0, x1, y1);
-   
-            canvbig[p] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: x0 withStartY: y0 withEndX: x1 withEndY: y1 withdist:distanceList[p]];
-            [self addSubview:canvbig[p]];
-            [canvbig[p] setNeedsDisplay];
-            
-        }
+        
     }
     
     //<--- For close button after clicking end--->
@@ -445,6 +322,10 @@
     // <--- Rotate Gesture --->
     rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotate:)];
     [self addGestureRecognizer:rotationRecognizer];
+    
+    // <--- Pan Gesture --->
+    panRecognizerBig = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveBig:)];
+    [self addGestureRecognizer:panRecognizerBig];
     
     // <--- Reseting the count back to NIL --->
     count = -1;
@@ -659,7 +540,7 @@
     else {
         
         //<--- Snap Button --->
-        snapButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 41, cwidth, cheight-41)];
+        snapButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 41, cwidth, cheight/2)];
         snapButton.backgroundColor = [UIColor clearColor];
         [snapButton addTarget:self action:@selector(snapButtonTouchUpInside) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:snapButton];

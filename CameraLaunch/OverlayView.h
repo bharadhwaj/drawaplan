@@ -44,7 +44,12 @@
     CGFloat cwidth;
     CGFloat cheight;
     CGFloat lastRotation;
+    CGFloat lastScale;
     CGFloat rotationTouch;
+    CGFloat firstX;
+    CGFloat firstY;
+    CGFloat firstXBig;
+    CGFloat firstYBig;
     
     UINavigationBar *navBar;
     
@@ -59,6 +64,11 @@
     UIBezierPath *myPath;
 
     UIRotationGestureRecognizer *rotationRecognizer;
+    
+    UIPinchGestureRecognizer *pinchRecognizer;
+    
+    UIPanGestureRecognizer *panRecognizer;
+    UIPanGestureRecognizer *panRecognizerBig;
     
     
     float lengthFinal;
