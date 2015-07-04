@@ -70,6 +70,7 @@
     UIPanGestureRecognizer *panRecognizer;
     UIPanGestureRecognizer *panRecognizerBig;
     
+    CGFloat sx1,sy1,tx1,ty1;
     
     float lengthFinal;
     float rollAngle;
@@ -79,10 +80,12 @@
   
     float lengthOne;
     float heightInFloat;
-    float scaleInFloat;
+    int scaleInFloat;
     
     float pointsList[100][2]; // Contains the relative co-ordinate from zero plane
     float pointsListBig[100][2];
+    float pointsList1[100][2];
+
     
     float lengthList[100]; // Contains the length from camera to each point
     float angleList[100]; // Contains the roll angle to each point. (Roll angle is horizontal angle)
@@ -92,7 +95,7 @@
     
     int loop;
     int numberOfPoints; // Contains number of times snap is clicked.
-
+    int flag;
 
 }
 

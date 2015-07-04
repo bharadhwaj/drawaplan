@@ -104,6 +104,21 @@
 // <--- Action when Snap button on screen is pressed --->
 - (void)snapButtonTouchUpInside {
     
+    CGFloat xWmin, xWmax, yWmin, yWmax, xVmin, xVmax, yVmin, yVmax,xmin = 0,xmax = 0,ymin = 0,ymax = 0;
+    
+    xWmin = 0;
+    xWmax = cwidth;
+    yWmin = 0;
+    yWmax = cheight;
+    
+    // cwidth/2+15, cheight/2+45, cwidth/2-30, cheight/2-100
+    
+    xVmin = cwidth/2+15;
+    xVmax = cwidth-30;
+    yVmin = cheight/2+45;
+    yVmax = cheight;
+
+    
     count++;
     loop = count;
     
@@ -113,7 +128,12 @@
     
     // <--- Reading scale from NSUserDefaults --->
     scale = [[NSUserDefaults standardUserDefaults] stringForKey:@"Scale"];
-    scaleInFloat = [scale floatValue];
+    scaleInFloat = [scale intValue];
+    
+    NSString* scaleString = [NSString stringWithFormat:@"%i", scaleInFloat];
+    
+    
+    long len = [scaleString length];
     
     angleOne = rollAngle*180/M_PI;
     
@@ -123,18 +143,38 @@
     angleList[count] = angleOne;
     
     float angle = angleList[0];
+    
 
     pointsList[count][0] = -1 * sqrtf(2.0) * lengthOne * (pixel/scaleInFloat) * sinf((angleOne-angle)*M_PI/180)+(cwidth/2);
     if (pointsList[count][0] < 0)
         pointsList[count][0] = -1 * pointsList[count][0];
     pointsListBig[count][0] = pointsList[count][0];
-    pointsList[count][0] = 0.5 * pointsList[count][0] + cwidth/2 + 15;
+    pointsList[count][0] = -3 * (scaleInFloat/len) *  lengthOne * sinf((angleOne-angle)*M_PI/180)+(cwidth/2);
     
     pointsList[count][1] = -1 * sqrtf(2.0) * lengthOne * (pixel/scaleInFloat) * cosf((angleOne-angle)*M_PI/180)+(cheight/2);
     if (pointsList[count][1] < 0)
         pointsList[count][1] = -1 * pointsList[count][1];
     pointsListBig[count][1] = pointsList[count][1];
-    pointsList[count][1] = 0.5 * pointsList[count][1] + cheight/2 + 45;
+    pointsList[count][1] =  -3 * (scaleInFloat/len) * lengthOne  * cosf((angleOne-angle)*M_PI/180)+(cheight/2);
+
+    
+    pointsList1[count][0]=pointsList[count][0];
+    pointsList1[count][1]=pointsList[count][1];
+    
+    
+    
+    //find edge points
+    if(flag==1)
+    {
+        NSLog(@" at main point sx1 sy1 tx1 ty1 %f %f %f %f",sx1,sy1,tx1,ty1);
+        
+        pointsList1[count][0]= sx1*pointsList1[count][0]+tx1;
+        pointsList1[count][1]= sy1*pointsList1[count][1]+ty1;
+        
+    }
+    
+
+    
     
     if(count >= 1) {
         int j;
@@ -182,9 +222,118 @@
             
         }
         
-        canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsList[p][0] withStartY: pointsList[p][1] withEndX: pointsList[q][0] withEndY: pointsList[q][1] withdist:distanceList[count-1]];
+        xVmin = cwidth/2 + 30;
+        xVmax = cwidth - 30;
+        yVmin = cheight/2 + 100;
+        yVmax = yVmin + (xVmax - xVmin);
+
+        
+        
+        if(pointsList1[p][0] < xVmin || pointsList1[p][0] > xVmax || pointsList1[p][1] > yVmax || pointsList1[p][1] < yVmin  || pointsList1[q][0] < xVmin|| pointsList1[q][0] > xVmax || pointsList1[q][1] > yVmax  || pointsList1[q][1] < yVmin) {
+        
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Warning: " message:@"Image has been scaled!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [alert show];
+            for(int k = 0;k <= count; k++) {
+                if(k == 0) {
+                    xmin=pointsList1[k][0];
+                    ymin=pointsList1[k][1];
+                    xmax=pointsList1[k][0];
+                    ymax=pointsList1[k][1];
+                }
+                if(pointsList1[k][0]>xmax)
+                    xmax=pointsList1[k][0];
+                if(pointsList1[k][0]<xmin)
+                    xmin=pointsList1[k][0];
+                if(pointsList1[k][1]>ymax)
+                    ymax=pointsList1[k][1];
+                if(pointsList1[k][1]<ymin)
+                    ymin=pointsList1[k][1];
+            }
+            NSLog(@" at scaling xmin xmax,ymin ymax %f %f %f %f",xmin,xmax,ymin,ymax);
+
+            float temp;
+            
+            if(ymax-ymin>xmax-xmin) {
+                temp=(ymax-ymin);
+                temp=temp-(xmax-xmin);
+                xmax=xmax+temp;
+            }
+            
+            else {
+                temp=(xmax-xmin);
+                temp=temp-(ymax-ymin);
+                ymax=ymax+temp;
+            }
+            
+            
+            
+            NSLog(@"scaled points");
+            sx1=(xVmax-xVmin)/(xmax-xmin);
+            sy1=(yVmax-yVmin)/(ymax-ymin);
+            
+            
+            
+            tx1 = (xmax*xVmin - xmin*xVmax)/(xmax - xmin);
+            ty1 = (ymax*yVmin - ymin*yVmax)/(ymax - ymin);
+            
+            NSLog(@" at scaling sx1 sy1 tx1 ty1 %f %f %f %f",sx1,sy1,tx1,ty1);
+            
+            for(int k=0;k<count;k++)
+                [canv[k] removeFromSuperview];
+            
+            flag=1;
+            for(int k=0;k<=count;k++)
+            {
+                // NSLog(@" sx1 sy1 tx1 ty1 %f %f %f %f",sx1,sy1,tx1,ty1);
+                NSLog(@"orginal points %f %f ",pointsList1[k][0],pointsList1[k][1]);
+                pointsList1[k][0]= sx1*pointsList1[k][0]+tx1;
+                pointsList1[k][1]= sy1*pointsList1[k][1]+ty1;
+                NSLog(@" x and y %f %f",pointsList1[k][0],pointsList1[k][1]);
+            }
+            
+            for(int k=1;k<=count;k++)
+            {
+                p=k-1;
+                q=k;
+                canv[p] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsList1[p][0] withStartY: pointsList1[p][1] withEndX: pointsList1[q][0] withEndY: pointsList1[q][1] withdist: distanceList[p]];
+                [self addSubview:canv[p]];
+                [canv[p] setNeedsDisplay];
+                
+            }
+            
+            /* NSLog(@" x and y are %f %f %f %f",pointsList[p][0],pointsList[p][1],pointsList[q][0],pointsList[q][1]);
+             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Cannot draw. Point out of drawing area." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+             [alert show];
+             count--;
+             */
+            
+        }
+        else {
+            
+            pointsList1[count][0]= sx1*pointsList1[count][0]+tx1;
+            pointsList1[count][1]= sy1*pointsList1[count][1]+ty1;
+
+            
+            for(int k=1;k<=count;k++)
+            {
+                p=k-1;
+                q=k;
+                canv[p] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsList1[p][0] withStartY: pointsList1[p][1] withEndX: pointsList1[q][0] withEndY: pointsList1[q][1] withdist: distanceList[p]];
+                [self addSubview:canv[p]];
+                [canv[p] setNeedsDisplay];
+                
+            }
+            
+        }
+        
+
+        
+        
+        
+     /*   canv[count-1] = [[canvas alloc] initWithFrame:CGRectMake(0, 0, cwidth, cheight) withStartX: pointsList[p][0] withStartY: pointsList[p][1] withEndX: pointsList[q][0] withEndY: pointsList[q][1] withdist:distanceList[count-1]];
         [self addSubview:canv[count-1]];
         [canv[count-1] setNeedsDisplay];
+      */
             
         
     }
@@ -262,7 +411,7 @@
 
 - (void)endButtonTouchUpInside {
 
-    
+    flag=0;
     // <--- For blurring the BG --->
     UIVisualEffect *blurEffect;
     blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
