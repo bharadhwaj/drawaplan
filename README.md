@@ -1,7 +1,7 @@
 # drawaplan
 
 >This is the official github repo of drawaplan created by:  
-**Bharadhwaj CN** _and_ **Divya V*  
+**Bharadhwaj CN** _and_ **Divya V**  
 >as interns of QBurst Technologies.  
 
 ##Abstract##
