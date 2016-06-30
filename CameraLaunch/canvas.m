@@ -2,8 +2,7 @@
 //  canvas.m
 //  CameraLaunch
 //
-//  Created by Divya on 23/06/15.
-//  Copyright (c) 2015 QBurst. All rights reserved.
+//  Created by Bharadhwaj on 23/06/15.
 //
 
 #import "canvas.h"
